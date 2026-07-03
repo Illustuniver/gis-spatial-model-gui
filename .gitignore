@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# WorkBuddy
+.codebuddy/
+.workbuddy/
+
+# Dev planning (not source)
+tasklist.txt
+
+# Runtime config (local paths)
+_gui_config.json
+
+# Generated project files
+*.dsproj
