@@ -31,6 +31,7 @@ class ProjectSnapshot:
     fca_dir: str = ''
     tabs_data: Dict[str, dict] = field(default_factory=dict)
     model_config: Dict[str, Any] = field(default_factory=dict)
+    model_selection: str = ''     # 当前选中的模型名
     saved_at: str = ''
 
     def to_dict(self) -> dict:
@@ -46,6 +47,7 @@ class ProjectSnapshot:
             },
             'tabs': self.tabs_data,
             'model_config': self.model_config,
+            'model_selection': self.model_selection,
         }
 
     @classmethod
@@ -59,6 +61,7 @@ class ProjectSnapshot:
             fca_dir=g.get('fca_dir', ''),
             tabs_data=data.get('tabs', {}),
             model_config=data.get('model_config', {}),
+            model_selection=data.get('model_selection', ''),
             saved_at=data.get('saved_at', ''),
         )
 

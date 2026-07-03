@@ -282,17 +282,11 @@ class MainWindow:
             messagebox.showerror("错误", f"打开工程失败:\n{e}")
             return
 
-        # 全局配置
-        g = data.get('global', {})
-        self.app_state.config.ref_raster = g.get('ref_raster', '')
-        self.app_state.config.out_dir = g.get('out_dir', '')
-        self.app_state.config.fragstats_exe = g.get('fragstats_exe', '')
-        self.app_state.config.fca_dir = g.get('fca_dir', '')
-        self.app_state.config.save()
-        self._ref_picker.set_path(self.app_state.config.ref_raster)
-        # 工程状态 → ProjectSnapshot
+        # 1. 工程状态 → ProjectSnapshot (单次解析)
         snapshot = ProjectSnapshot.from_dict(data)
         self.app_state.project = snapshot
+
+        # 2. 全局配置 → AppConfig + UI 控件
         self.app_state.config.ref_raster = snapshot.ref_raster
         self.app_state.config.out_dir = snapshot.out_dir
         self.app_state.config.fragstats_exe = snapshot.fragstats_exe
@@ -302,7 +296,7 @@ class MainWindow:
         self._out_picker.set_path(snapshot.out_dir)
         self._update_status()
 
-        # 各页面恢复
+        # 3. 各页面状态恢复 + 主动刷新
         tab_mapping = [
             ('tab1', 'tab1_vector_join'),
             ('tab2', 'tab2_raster_sample'),
@@ -312,6 +306,27 @@ class MainWindow:
         for tab_key, data_key in tab_mapping:
             if tab_key in self._pages:
                 self._pages[tab_key].set_state(snapshot.tabs_data.get(data_key, {}))
+        # 触发 UI hydration: 通知各页面窗口已加载完成
+        self.root.update_idletasks()
+        self.root.after(100, self._post_load_refresh)
+
+        # 4. 最近工程
+        self._current_project = path
+        self.app_state.config.add_recent_project(path)
+        self._update_recent_menu()
+        self.log_manager.log(f"工程已打开: {path}")
+        self._recent_status.config(text=f"最近: {os.path.basename(path)}")
+
+    def _post_load_refresh(self):
+        """工程加载后的 UI hydration (延迟刷新)."""
+        # 更新状态栏
+        self._update_status()
+        # 如果 Tab2 有批量数据, 触发 TIF 列表刷新
+        if 'tab2' in self._pages:
+            tab2 = self._pages['tab2']
+            if hasattr(tab2, '_b_targets') and tab2._b_targets:
+                tab2._refresh_tif_tree_for_target(tab2._active_target)
+        self.log_manager.log("UI 状态已恢复")
 
         self._current_project = path
         self.app_state.config.add_recent_project(path)

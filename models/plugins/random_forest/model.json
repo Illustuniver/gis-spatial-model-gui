@@ -1,0 +1,64 @@
+{
+  "name": "Random Forest",
+  "version": "1.0",
+  "description": "随机森林集成回归模型，适用于高维非线性特征建模",
+  "type": "regression",
+  "input_schema": {
+    "features": "numeric",
+    "target": "numeric",
+    "supports_spatial": false
+  },
+  "params": [
+    {
+      "name": "n_estimators",
+      "type": "int",
+      "default": 100,
+      "min": 10,
+      "max": 1000,
+      "step": 10,
+      "label": "树的数量",
+      "help": "森林中决策树的数量。越多越稳定，但计算时间更长"
+    },
+    {
+      "name": "max_depth",
+      "type": "int",
+      "default": 10,
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "label": "最大深度",
+      "help": "每棵树的最大深度。None 表示不限制"
+    },
+    {
+      "name": "min_samples_split",
+      "type": "int",
+      "default": 2,
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "label": "最小分裂样本数",
+      "help": "内部节点再分裂所需的最小样本数"
+    },
+    {
+      "name": "min_samples_leaf",
+      "type": "int",
+      "default": 1,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "最小叶节点样本数",
+      "help": "叶节点所需的最小样本数"
+    },
+    {
+      "name": "random_state",
+      "type": "int",
+      "default": 42,
+      "min": 0,
+      "max": 9999,
+      "step": 1,
+      "label": "随机种子",
+      "help": "固定随机种子以保证结果可复现"
+    }
+  ],
+  "dependencies": ["scikit-learn"]
+}

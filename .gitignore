@@ -23,3 +23,11 @@ _gui_config.json
 
 # Generated project files
 *.dsproj
+test_data/
+*.shp
+*.dbf
+*.prj
+*.shx
+*.cpg
+*.tif
+*.adf

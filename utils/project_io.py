@@ -41,11 +41,11 @@ class ProjectManager:
     CURRENT_VERSION = '1.0'
 
     def save(self, path, state_dict):
-        """保存工程文件.
+        """保存工程文件 — 薄封装.
 
         Args:
             path:        保存路径 (自动加 .dsproj 后缀)
-            state_dict:  状态字典 (通常由 AppState.to_dict() 生成)
+            state_dict:  状态字典 (由 ProjectSnapshot.to_dict() 生成).
 
         Returns:
             str: 实际保存的文件路径.
@@ -54,38 +54,29 @@ class ProjectManager:
         if not path.lower().endswith('.dsproj'):
             path += '.dsproj'
 
-        # 注入元数据
-        data = {
-            'version': self.CURRENT_VERSION,
-            'saved_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        }
-        data.update(state_dict)
-
         # 确保目录存在
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
         with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+            json.dump(state_dict, f, indent=2, ensure_ascii=False)
 
         return path
 
     def load(self, path):
-        """加载工程文件.
+        """加载工程文件 — 薄封装.
 
-        向下兼容规则:
-          - 旧版本缺少的字段自动用默认值填充
-          - 不存在的 tab 自动给空字典
-          - version 字段缺失时默认为 '1.0'
+        纯透传: 返回的 dict 可直接传给 ProjectSnapshot.from_dict().
+        向下兼容在 from_dict() 中用 .get() 实现.
 
         Args:
             path: 工程文件路径 (.dsproj).
 
         Returns:
-            dict: 状态字典.
+            dict: JSON 原始数据.
 
         Raises:
             FileNotFoundError: 文件不存在.
-            ValueError: JSON 格式错误或结构损坏.
+            ValueError: JSON 格式错误.
         """
         if not os.path.isfile(path):
             raise FileNotFoundError(f"工程文件不存在: {path}")
@@ -93,28 +84,10 @@ class ProjectManager:
         with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        # 校验: 必须有基本结构
         if not isinstance(data, dict):
             raise ValueError("工程文件格式错误: 根不是字典")
 
-        # 向下兼容: 用 .get() 逐字段读取，缺省自动填充
-        state = {
-            'version': data.get('version', '1.0'),
-            'saved_at': data.get('saved_at', ''),
-            'global': {
-                'ref_raster':    data.get('global', {}).get('ref_raster', ''),
-                'out_dir':       data.get('global', {}).get('out_dir', ''),
-                'fragstats_exe': data.get('global', {}).get('fragstats_exe', ''),
-                'fca_dir':       data.get('global', {}).get('fca_dir', ''),
-            },
-            'tab1_vector_join':    data.get('tab1_vector_join', {}),
-            'tab2_raster_sample':  data.get('tab2_raster_sample', {}),
-            'tab3_landscape':      data.get('tab3_landscape', {}),
-            'tab4_attribute':      data.get('tab4_attribute', {}),
-            'model_config':        data.get('model_config', {}),
-        }
-
-        return state
+        return data
 
     def validate(self, data):
         """校验工程文件版本和完整性.
