@@ -57,8 +57,9 @@ class AppConfig:
         candidates = []
         if sys.platform == 'win32':
             for drive in ['C:', 'D:']:
-                candidates.append(os.path.join(drive, 'Program Files', 'Fragstats 4.2', 'frg_cmd.exe'))
-                candidates.append(os.path.join(drive, 'Program Files', 'Fragstats 4.2', 'frg_gui.exe'))
+                root = drive + '\\'
+                candidates.append(os.path.join(root, 'Program Files', 'Fragstats 4.2', 'frg_cmd.exe'))
+                candidates.append(os.path.join(root, 'Program Files', 'Fragstats 4.2', 'frg_gui.exe'))
         else:
             candidates.extend(['/usr/local/bin/frg_cmd', '/opt/fragstats/frg_cmd'])
         for candidate in candidates:

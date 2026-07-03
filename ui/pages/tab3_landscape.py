@@ -17,6 +17,7 @@ from app.utils.thread_worker import TaskWorker
 from app.config.presets import (
     load_preset, list_presets, save_preset, get_class_map, generate_feature_names
 )
+from app.core.spatial_metadata import ProcessingWindow
 
 
 class LandscapePage(ttk.Frame):
@@ -266,12 +267,11 @@ class LandscapePage(ttk.Frame):
         for fn in sorted(os.listdir(d)):
             if not fn.endswith('.fca'):
                 continue
-            m = re.match(r'frag_(\d+)x\1\.fca', fn)
-            if m:
-                win = int(m.group(1))
-                label = f"{win}×{win}"
+            pw = ProcessingWindow.from_fca_filename(fn)
+            if pw:
+                label = f"{pw.size}×{pw.size}"
                 self.t3_win_listbox.insert('end', label)
-                self.t3_available_wins[label] = (win, os.path.join(d, fn))
+                self.t3_available_wins[label] = (pw.size, os.path.join(d, fn))
         self.log.log(f"FCA 文件夹: 找到 {len(self.t3_available_wins)} 个窗口")
 
     # ── 执行 ──
